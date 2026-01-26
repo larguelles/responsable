@@ -1,19 +1,19 @@
-import { api } from "@/lib/api";
-import { useMutation } from "@tanstack/react-query";
+import { api } from '@/lib/api';
+import { useMutation } from '@tanstack/react-query';
 
 type SendMessageVars = {
-    message: string;
-}
+  message: string;
+};
 
 type SendMessageResponse = {
-    text: string;
+  text: string;
 };
 
 export const useSendMessage = () => {
-    return useMutation({
-        mutationFn: async (vars: SendMessageVars) => {
-            const res = await api.post<SendMessageResponse>("/chat", vars);
-            return res?.data;
-        },
-    })
+  return useMutation({
+    mutationFn: async (vars: SendMessageVars) => {
+      const res = await api.post<SendMessageResponse>('/chat', vars);
+      return res?.data;
+    },
+  });
 };

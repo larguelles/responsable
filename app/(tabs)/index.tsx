@@ -1,98 +1,160 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Card } from '@/components/ui/Card';
+import { SelectSheet } from '@/components/ui/SelectSheet';
+import { theme } from '@/components/ui/theme';
+import { useCategories, useCreateExpense, useItems } from '@/hooks/use-expenses';
+import { useMemo, useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const HomeScreen = () => {
+  const { data: categories } = useCategories();
+  const { data: items } = useItems();
+  const createExpense = useCreateExpense();
 
-export default function HomeScreen() {
+  const [amountText, setAmountText] = useState('');
+  const [categoryName, setCategoryName] = useState('Groceries');
+  const [itemName, setItemName] = useState('Carrefour');
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [itemOpen, setItemOpen] = useState(false);
+
+  const amountCents = useMemo(() => {
+    const n = Number(amountText.replace(',', '.'));
+    if (!Number.isFinite(n)) return 0;
+    return Math.round(n * 100);
+  }, [amountText]);
+
+  const onSubmit = async () => {
+    if (!amountCents || amountCents <= 0) {
+      Alert.alert('Invalid amountCents', 'Use a positive integer (cents).');
+      return;
+    }
+
+    try {
+      await createExpense.mutateAsync({
+        amountCents: amountCents,
+        categoryName: categoryName.trim(),
+        itemName: itemName.trim(),
+      });
+      Alert.alert('Saved', 'Expense created.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.message ?? 'Failed to create expense.');
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={styles.wrapper}>
+      <Text style={styles.title}>New expense</Text>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <Card>
+        <Text style={styles.label}>Amount</Text>
+        <TextInput
+          value={amountText}
+          onChangeText={setAmountText}
+          keyboardType="decimal-pad"
+          style={styles.amount}
+          placeholder="0.00"
+          placeholderTextColor={theme.muted}
+        />
+
+        <View style={styles.row}>
+          <View style={styles.half}>
+            <Text style={styles.label}>Category</Text>
+            <Pressable style={styles.pick} onPress={() => setCategoryOpen(true)}>
+              <Text style={styles.pickText}>{categoryName || 'Select…'}</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.half}>
+            <Text style={styles.label}>Item</Text>
+            <Pressable style={styles.pick} onPress={() => setItemOpen(true)}>
+              <Text style={styles.pickText}>{itemName || 'Select…'}</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <SelectSheet
+          title="Category"
+          visible={categoryOpen}
+          items={(categories ?? []).map((c) => ({ id: c.id, name: c.name }))}
+          value={categoryName}
+          onClose={() => setCategoryOpen(false)}
+          onSelect={setCategoryName}
+        />
+
+        <SelectSheet
+          title="Item"
+          visible={itemOpen}
+          items={(items ?? []).map((i) => ({ id: i.id, name: i.name }))}
+          value={itemName}
+          onClose={() => setItemOpen(false)}
+          onSelect={setItemName}
+        />
+        <Pressable
+          onPress={onSubmit}
+          disabled={createExpense.isPending}
+          style={({ pressed }) => [
+            styles.cta,
+            (pressed || createExpense.isPending) && { opacity: 0.7 },
+          ]}
+        >
+          <Text style={styles.ctaText}>
+            {createExpense.isPending ? 'Saving...' : 'Save'}
+          </Text>
+        </Pressable>
+      </Card>
+
+      <Text style={styles.meta}>
+        Categories: {categories?.map((c) => c.name).join(', ') || '-'}
+      </Text>
+      <Text style={styles.meta}>
+        Items: {items?.map((i) => i.name).join(', ') || '—'}
+      </Text>
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  wrapper: {
+    flex: 1,
+    backgroundColor: theme.bg,
+    padding: theme.pad,
+    paddingTop: 64,
+    gap: 14,
+  },
+  title: { color: theme.text, fontSize: 28, fontWeight: '700' },
+  label: { color: theme.muted, fontSize: 12, marginBottom: 8 },
+  amount: {
+    color: theme.text,
+    fontSize: 44,
+    fontWeight: '700',
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.hairline,
+    marginBottom: 14,
+  },
+  row: { flexDirection: 'row', gap: 12 },
+  half: { flex: 1 },
+  input: {
+    color: theme.text,
+    fontSize: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.hairline,
+  },
+  cta: {
+    marginTop: 18,
+    backgroundColor: theme.accent,
+    borderRadius: 14,
+    paddingVertical: 12,
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  ctaText: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
+  meta: { color: theme.muted, fontSize: 12, marginTop: 10 },
+  pick: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.hairline,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  pickText: { color: theme.text, fontSize: 16 },
 });
+
+export default HomeScreen;
