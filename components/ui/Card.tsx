@@ -1,9 +1,9 @@
-import { themeFor, ThemeType } from "@/components/ui/theme";
-import { useAppSettings } from "@/providers/AppSettingsProvider";
+import { themeFor, ThemeType } from '@/components/ui/theme';
+import { useAppSettings } from '@/providers/AppSettingsProvider';
 import { useMemo } from 'react';
 import { StyleSheet, View, ViewProps } from 'react-native';
 
-const makeStyles = (theme: ThemeType) => 
+const makeStyles = (theme: ThemeType) =>
   StyleSheet.create({
     main: {
       backgroundColor: theme.card,
@@ -11,21 +11,12 @@ const makeStyles = (theme: ThemeType) =>
       padding: theme.pad,
       borderWidth: 1,
       borderColor: theme.hairline,
-    }
-  })
-
+    },
+  });
 
 export const Card = (props: ViewProps) => {
   const { resolvedScheme } = useAppSettings();
   const theme = useMemo(() => themeFor(resolvedScheme), [resolvedScheme]);
   const styles = useMemo(() => makeStyles(theme), [theme]);
-  return (
-    <View
-      {...props}
-      style={[
-        styles.main,
-        props.style,
-      ]}
-    />
-  );
+  return <View {...props} style={[styles.main, props.style]} />;
 };

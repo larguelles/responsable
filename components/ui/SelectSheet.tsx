@@ -26,7 +26,11 @@ type Props = {
 
 const makeStyles = (theme: ThemeType) =>
   StyleSheet.create({
-    backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' },
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.55)',
+      justifyContent: 'flex-end',
+    },
     sheet: {
       backgroundColor: theme.bg,
       borderTopLeftRadius: 22,
@@ -37,7 +41,11 @@ const makeStyles = (theme: ThemeType) =>
       borderColor: theme.hairline,
       maxHeight: '80%',
     },
-    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
     title: { color: theme.text, fontSize: 16, fontWeight: '700' },
     close: { color: theme.muted, fontSize: 14 },
     search: {
@@ -110,7 +118,7 @@ export const SelectSheet = ({
           <View style={styles.header}>
             <Text style={styles.title}>{title}</Text>
             <Pressable onPress={onClose} hitSlop={10}>
-              <Text style={styles.close}>{t("close")}</Text>
+              <Text style={styles.close}>{t('close')}</Text>
             </Pressable>
           </View>
 
@@ -127,7 +135,7 @@ export const SelectSheet = ({
           {canAdd ? (
             <Pressable style={styles.addRow} onPress={() => onPick(q.trim())}>
               <Text style={styles.addText}>
-              {t("add")} {'"'}
+                {t('add')} {'"'}
                 {q.trim()}
                 {'"'}
               </Text>

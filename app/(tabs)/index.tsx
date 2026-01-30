@@ -7,7 +7,7 @@ import { useAppSettings } from '@/providers/AppSettingsProvider';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
-const makeStyles = (theme: ThemeType) => 
+const makeStyles = (theme: ThemeType) =>
   StyleSheet.create({
     wrapper: {
       flex: 1,
@@ -95,10 +95,10 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.wrapper}>
-      <Text style={styles.title}>{t("home_title")}</Text>
+      <Text style={styles.title}>{t('home_title')}</Text>
 
       <Card>
-        <Text style={styles.label}>{t("amount")}</Text>
+        <Text style={styles.label}>{t('amount')}</Text>
         <TextInput
           value={amountText}
           onChangeText={setAmountText}
@@ -110,22 +110,22 @@ const HomeScreen = () => {
 
         <View style={styles.row}>
           <View style={styles.half}>
-            <Text style={styles.label}>{t("category")}</Text>
+            <Text style={styles.label}>{t('category')}</Text>
             <Pressable style={styles.pick} onPress={() => setCategoryOpen(true)}>
-              <Text style={styles.pickText}>{categoryName || t("select")}</Text>
+              <Text style={styles.pickText}>{categoryName || t('select')}</Text>
             </Pressable>
           </View>
 
           <View style={styles.half}>
             <Text style={styles.label}>Item</Text>
             <Pressable style={styles.pick} onPress={() => setItemOpen(true)}>
-              <Text style={styles.pickText}>{itemName || t("select")}</Text>
+              <Text style={styles.pickText}>{itemName || t('select')}</Text>
             </Pressable>
           </View>
         </View>
 
         <SelectSheet
-          title={t("category")}
+          title={t('category')}
           visible={categoryOpen}
           items={(categories ?? []).map((c) => ({ id: c.id, name: c.name }))}
           value={categoryName}
@@ -134,7 +134,7 @@ const HomeScreen = () => {
         />
 
         <SelectSheet
-          title={t("item")}
+          title={t('item')}
           visible={itemOpen}
           items={(items ?? []).map((i) => ({ id: i.id, name: i.name }))}
           value={itemName}
@@ -150,16 +150,16 @@ const HomeScreen = () => {
           ]}
         >
           <Text style={styles.ctaText}>
-            {createExpense.isPending ? t("saving") : t("save")}
+            {createExpense.isPending ? t('saving') : t('save')}
           </Text>
         </Pressable>
       </Card>
 
       <Text style={styles.meta}>
-        {t("categories")}: {categories?.map((c) => c.name).join(', ') || '-'}
+        {t('categories')}: {categories?.map((c) => c.name).join(', ') || '-'}
       </Text>
       <Text style={styles.meta}>
-        {t("items")}: {items?.map((i) => i.name).join(', ') || '—'}
+        {t('items')}: {items?.map((i) => i.name).join(', ') || '—'}
       </Text>
     </View>
   );
