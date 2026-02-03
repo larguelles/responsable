@@ -384,7 +384,12 @@ function ManualPanel({
       </Card>
 
       <Card>
-        <Text style={styles.h2}>{t('filters')} <Text style={[styles.h2, {fontSize: 12, color: theme.muted}]}>({t('oneOrAnother')})</Text></Text>
+        <Text style={styles.h2}>
+          {t('filters')}{' '}
+          <Text style={[styles.h2, { fontSize: 12, color: theme.muted }]}>
+            ({t('oneOrAnother')})
+          </Text>
+        </Text>
 
         <View style={{ gap: 10 }}>
           <FilterButton
@@ -487,10 +492,10 @@ function ChatPanel({
     const assistantId = String(Date.now()) + '_a';
     useChatStore.getState().addMessage({
       id: assistantId,
-      role: "assistant",
-      text: "",
+      role: 'assistant',
+      text: '',
       createdAt: Date.now(),
-      status: "sending",    
+      status: 'sending',
     });
 
     try {
@@ -524,15 +529,19 @@ function ChatPanel({
           keyExtractor={(m) => m.id}
           contentContainerStyle={{ gap: 10, paddingBottom: 10 }}
           renderItem={({ item }) => (
-            <View style={[styles.bubble, item.role === "user" ? styles.bubbleUser : styles.bubbleAssistant]}>
-              {item.status === "sending" ? (
+            <View
+              style={[
+                styles.bubble,
+                item.role === 'user' ? styles.bubbleUser : styles.bubbleAssistant,
+              ]}
+            >
+              {item.status === 'sending' ? (
                 <ThinkingDots style={{ color: theme.text }} />
               ) : (
                 <Text style={{ color: theme.text }}>{item.text}</Text>
               )}
             </View>
           )}
-          
         />
       </Card>
 

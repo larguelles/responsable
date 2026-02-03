@@ -47,7 +47,7 @@ export const translations = {
     send: 'Send',
     autoRunOffHint: 'Enable Auto Run in Settings or run manually',
     requestFailed: 'Request failed',
-    oneOrAnother: 'One or another'
+    oneOrAnother: 'One or another',
   },
   es: {
     home_title: 'Nuevo gasto',
@@ -97,6 +97,6 @@ export const translations = {
     send: 'Enviar',
     autoRunOffHint: 'Activá Auto Run en Ajustes o ejecutá manualmente',
     requestFailed: 'Falló la solicitud',
-    oneOrAnother: 'Uno u otro'
+    oneOrAnother: 'Uno u otro',
   },
 } as const;

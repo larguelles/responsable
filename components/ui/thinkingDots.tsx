@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { Text } from "react-native";
+import { useEffect, useState } from 'react';
+import { Text } from 'react-native';
 
 export function ThinkingDots({
-  base = "",
+  base = '',
   intervalMs = 350,
   style,
 }: {
@@ -17,6 +17,11 @@ export function ThinkingDots({
     return () => clearInterval(id);
   }, [intervalMs]);
 
-  const dots = ".".repeat(i + 1);
-  return <Text style={style}>{base}{dots}</Text>;
+  const dots = '.'.repeat(i + 1);
+  return (
+    <Text style={style}>
+      {base}
+      {dots}
+    </Text>
+  );
 }
