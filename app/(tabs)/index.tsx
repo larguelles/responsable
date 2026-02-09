@@ -5,18 +5,36 @@ import { useCategories, useCreateExpense, useItems } from '@/hooks/use-expenses'
 import { useTranslation } from '@/i18n/i18n';
 import { useAppSettings } from '@/providers/AppSettingsProvider';
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
 const makeStyles = (theme: ThemeType) =>
   StyleSheet.create({
     wrapper: {
       flex: 1,
       backgroundColor: theme.bg,
+    },
+    scrollContent: {
       padding: theme.pad,
       paddingTop: 64,
+      paddingBottom: 32,
       gap: 14,
     },
-    title: { color: theme.text, fontSize: 28, fontWeight: '700' },
+    title: {
+      color: theme.text,
+      fontSize: 28,
+      fontWeight: '700',
+      marginBottom: 4,
+    },
     label: { color: theme.muted, fontSize: 12, marginBottom: 8 },
     amount: {
       color: theme.text,
@@ -43,8 +61,14 @@ const makeStyles = (theme: ThemeType) =>
       paddingVertical: 12,
       alignItems: 'center',
     },
-    ctaText: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
-    meta: { color: theme.muted, fontSize: 12, marginTop: 10 },
+    ctaText: { color: theme.onAccent, fontSize: 16, fontWeight: '700' },
+    hint: {
+      color: theme.muted,
+      fontSize: 13,
+      marginTop: 16,
+      paddingHorizontal: 4,
+      lineHeight: 18,
+    },
     pick: {
       paddingVertical: 10,
       borderBottomWidth: 1,
@@ -54,8 +78,8 @@ const makeStyles = (theme: ThemeType) =>
   });
 
 const HomeScreen = () => {
-  const { resolvedScheme } = useAppSettings();
-  const theme = useMemo(() => themeFor(resolvedScheme), [resolvedScheme]);
+  const { resolvedScheme, themeVariant } = useAppSettings();
+  const theme = useMemo(() => themeFor(resolvedScheme, themeVariant), [resolvedScheme, themeVariant]);
   const styles = useMemo(() => makeStyles(theme), [theme]);
   const t = useTranslation();
 
@@ -87,81 +111,86 @@ const HomeScreen = () => {
         categoryName: categoryName.trim(),
         itemName: itemName.trim(),
       });
-      Alert.alert('Saved', 'Expense created.');
+      setAmountText('');
+      Alert.alert(t('saved'), t('expense_created'));
     } catch (e: any) {
       Alert.alert('Error', e?.message ?? 'Failed to create expense.');
     }
   };
 
   return (
-    <View style={styles.wrapper}>
-      <Text style={styles.title}>{t('home_title')}</Text>
+    <KeyboardAvoidingView
+      style={styles.wrapper}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.title}>{t('home_title')}</Text>
 
-      <Card>
-        <Text style={styles.label}>{t('amount')}</Text>
-        <TextInput
-          value={amountText}
-          onChangeText={setAmountText}
-          keyboardType="decimal-pad"
-          style={styles.amount}
-          placeholder="0.00"
-          placeholderTextColor={theme.muted}
-        />
+        <Card>
+          <Text style={styles.label}>{t('amount')}</Text>
+          <TextInput
+            value={amountText}
+            onChangeText={setAmountText}
+            keyboardType="decimal-pad"
+            style={styles.amount}
+            placeholder="0.00"
+            placeholderTextColor={theme.muted}
+          />
 
-        <View style={styles.row}>
-          <View style={styles.half}>
-            <Text style={styles.label}>{t('category')}</Text>
-            <Pressable style={styles.pick} onPress={() => setCategoryOpen(true)}>
-              <Text style={styles.pickText}>{categoryName || t('select')}</Text>
-            </Pressable>
+          <View style={styles.row}>
+            <View style={styles.half}>
+              <Text style={styles.label}>{t('category')}</Text>
+              <Pressable style={styles.pick} onPress={() => setCategoryOpen(true)}>
+                <Text style={styles.pickText}>{categoryName || t('select')}</Text>
+              </Pressable>
+            </View>
+
+            <View style={styles.half}>
+              <Text style={styles.label}>{t('item')}</Text>
+              <Pressable style={styles.pick} onPress={() => setItemOpen(true)}>
+                <Text style={styles.pickText}>{itemName || t('select')}</Text>
+              </Pressable>
+            </View>
           </View>
 
-          <View style={styles.half}>
-            <Text style={styles.label}>Item</Text>
-            <Pressable style={styles.pick} onPress={() => setItemOpen(true)}>
-              <Text style={styles.pickText}>{itemName || t('select')}</Text>
-            </Pressable>
-          </View>
-        </View>
+          <SelectSheet
+            title={t('category')}
+            visible={categoryOpen}
+            items={(categories ?? []).map((c) => ({ id: c.id, name: c.name }))}
+            value={categoryName}
+            onClose={() => setCategoryOpen(false)}
+            onSelect={setCategoryName}
+          />
 
-        <SelectSheet
-          title={t('category')}
-          visible={categoryOpen}
-          items={(categories ?? []).map((c) => ({ id: c.id, name: c.name }))}
-          value={categoryName}
-          onClose={() => setCategoryOpen(false)}
-          onSelect={setCategoryName}
-        />
+          <SelectSheet
+            title={t('item')}
+            visible={itemOpen}
+            items={(items ?? []).map((i) => ({ id: i.id, name: i.name }))}
+            value={itemName}
+            onClose={() => setItemOpen(false)}
+            onSelect={setItemName}
+          />
+          <Pressable
+            onPress={onSubmit}
+            disabled={createExpense.isPending}
+            style={({ pressed }) => [
+              styles.cta,
+              (pressed || createExpense.isPending) && { opacity: 0.7 },
+            ]}
+          >
+            <Text style={styles.ctaText}>
+              {createExpense.isPending ? t('saving') : t('save')}
+            </Text>
+          </Pressable>
+        </Card>
 
-        <SelectSheet
-          title={t('item')}
-          visible={itemOpen}
-          items={(items ?? []).map((i) => ({ id: i.id, name: i.name }))}
-          value={itemName}
-          onClose={() => setItemOpen(false)}
-          onSelect={setItemName}
-        />
-        <Pressable
-          onPress={onSubmit}
-          disabled={createExpense.isPending}
-          style={({ pressed }) => [
-            styles.cta,
-            (pressed || createExpense.isPending) && { opacity: 0.7 },
-          ]}
-        >
-          <Text style={styles.ctaText}>
-            {createExpense.isPending ? t('saving') : t('save')}
-          </Text>
-        </Pressable>
-      </Card>
-
-      <Text style={styles.meta}>
-        {t('categories')}: {categories?.map((c) => c.name).join(', ') || '-'}
-      </Text>
-      <Text style={styles.meta}>
-        {t('items')}: {items?.map((i) => i.name).join(', ') || '—'}
-      </Text>
-    </View>
+        <Text style={styles.hint}>{t('home_hint')}</Text>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
