@@ -1,6 +1,6 @@
 import { useTranslation } from '@/i18n/i18n';
 import { useAppSettings } from '@/providers/AppSettingsProvider';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   FlatList,
   Modal,
@@ -9,6 +9,8 @@ import {
   Text,
   TextInput,
   View,
+  type StyleProp,
+  type ViewStyle,
 } from 'react-native';
 import { themeFor, ThemeType } from './theme';
 
@@ -20,6 +22,7 @@ type Props = {
   items: Item[];
   value: string;
   placeholder?: string;
+  placeholderShowOrAdd?: boolean;
   onClose: () => void;
   onSelect: (name: string) => void;
 };
@@ -48,9 +51,12 @@ const makeStyles = (theme: ThemeType) =>
     },
     title: { color: theme.text, fontSize: 16, fontWeight: '700' },
     close: { color: theme.muted, fontSize: 14 },
-    search: {
+    searchWrap: {
       marginTop: 12,
       marginBottom: 10,
+      position: 'relative',
+    },
+    search: {
       paddingVertical: 10,
       paddingHorizontal: 12,
       borderRadius: 12,
@@ -59,6 +65,15 @@ const makeStyles = (theme: ThemeType) =>
       borderWidth: 1,
       borderColor: theme.hairline,
     },
+    placeholderOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    placeholderMuted: { color: theme.muted, fontSize: 16 },
+    placeholderAccent: { color: theme.accent, fontSize: 16 },
     addRow: {
       paddingVertical: 12,
       paddingHorizontal: 12,
@@ -75,21 +90,27 @@ const makeStyles = (theme: ThemeType) =>
     sep: { height: 1, backgroundColor: theme.hairline },
   });
 
+function ListSeparator({ style }: Readonly<{ style: StyleProp<ViewStyle> }>) {
+  return <View style={style} />;
+}
+
 export const SelectSheet = ({
   title,
   visible,
   items,
   value,
   placeholder = 'Search...',
+  placeholderShowOrAdd = true,
   onClose,
   onSelect,
 }: Props) => {
-  const { resolvedScheme } = useAppSettings();
-  const theme = useMemo(() => themeFor(resolvedScheme), [resolvedScheme]);
+  const { resolvedScheme, themeVariant } = useAppSettings();
+  const theme = useMemo(() => themeFor(resolvedScheme, themeVariant), [resolvedScheme, themeVariant]);
   const styles = useMemo(() => makeStyles(theme), [theme]);
   const t = useTranslation();
 
   const [q, setQ] = useState('');
+  const [focused, setFocused] = useState(false);
 
   const normalized = (s: string) => s.trim().toLowerCase();
 
@@ -111,6 +132,11 @@ export const SelectSheet = ({
     onClose();
   };
 
+  const itemSeparator = useCallback(
+    () => <ListSeparator style={styles.sep} />,
+    [styles.sep],
+  );
+
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.backdrop}>
@@ -122,15 +148,26 @@ export const SelectSheet = ({
             </Pressable>
           </View>
 
-          <TextInput
-            value={q}
-            onChangeText={setQ}
-            placeholder={placeholder}
-            placeholderTextColor={theme.muted}
-            style={styles.search}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
+          <View style={styles.searchWrap}>
+            <TextInput
+              value={q}
+              onChangeText={setQ}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              placeholder=""
+              style={styles.search}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            {!q && !focused ? (
+              <View style={styles.placeholderOverlay} pointerEvents="none">
+                <Text style={styles.placeholderMuted}>{t('search')}</Text>
+                {placeholderShowOrAdd ? (
+                  <Text style={styles.placeholderAccent}> {t('orAdd')}</Text>
+                ) : null}
+              </View>
+            ) : null}
+          </View>
 
           {canAdd ? (
             <Pressable style={styles.addRow} onPress={() => onPick(q.trim())}>
@@ -154,7 +191,7 @@ export const SelectSheet = ({
                 ) : null}
               </Pressable>
             )}
-            ItemSeparatorComponent={() => <View style={styles.sep} />}
+            ItemSeparatorComponent={itemSeparator}
           />
         </View>
       </View>
