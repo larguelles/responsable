@@ -23,12 +23,9 @@ export const t = (key: keyof typeof translations.en) => i18n.t(key);
 export const useTranslation = () => {
   const { lang } = useAppSettings();
 
-  // Return a t function that depends on lang, so React re-renders when lang changes
-  // Use lang directly from closure instead of relying on i18n.locale for immediate updates
   return useMemo(() => {
-    setLang(lang); // Keep i18n.locale in sync for any other code that might use it
+    setLang(lang);
     return (key: keyof typeof translations.en) => {
-      // Access translations directly using lang to ensure we get the current language
       const translation = translations[lang]?.[key] ?? translations.en[key] ?? key;
       return translation;
     };
