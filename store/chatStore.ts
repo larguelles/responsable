@@ -5,7 +5,8 @@ export type ChatRole = 'user' | 'assistant';
 export type ChatMessage = {
   id: string;
   role: ChatRole;
-  text: string;
+  text?: string;
+  result?: unknown;
   createdAt: number;
   status?: 'sending' | 'sent' | 'error';
 };
