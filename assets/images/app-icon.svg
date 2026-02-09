@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Default theme accent; replace fill to match your theme (e.g. #FFC600 for cobalt2) -->
+    <style>
+      .bg { fill: #fa5311; }
+      .fg { fill: none; stroke: #ffffff; stroke-width: 56; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+  <!-- Apple-style corner radius (~22.37%) -->
+  <rect class="bg" width="1024" height="1024" rx="229" ry="229"/>
+  <!-- Sleek R (clean stem, closed bowl, leg) -->
+  <path class="fg" stroke-width="61" d="M 143 164 L 143 860
+       M 143 164 L 430 164 Q 594 164 594 389 Q 594 553 430 553 L 143 553
+       M 430 553 L 676 860"/>
+  <!-- Clear $ (two bars + S-curve) -->
+  <path class="fg" stroke-width="51" d="M 737 143 L 737 881
+       M 860 143 L 860 881
+       M 737 307 C 737 307 860 389 860 512 C 860 635 737 717 737 717
+       M 860 348 C 860 348 737 430 737 512 C 737 594 860 676 860 676"/>
+</svg>

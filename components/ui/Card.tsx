@@ -15,8 +15,8 @@ const makeStyles = (theme: ThemeType) =>
   });
 
 export const Card = (props: ViewProps) => {
-  const { resolvedScheme } = useAppSettings();
-  const theme = useMemo(() => themeFor(resolvedScheme), [resolvedScheme]);
+  const { resolvedScheme, themeVariant } = useAppSettings();
+  const theme = useMemo(() => themeFor(resolvedScheme, themeVariant), [resolvedScheme, themeVariant]);
   const styles = useMemo(() => makeStyles(theme), [theme]);
   return <View {...props} style={[styles.main, props.style]} />;
 };
